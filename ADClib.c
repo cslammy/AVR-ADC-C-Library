@@ -59,7 +59,7 @@ unsigned int analogRead10bit()
 	// Wait until the ADSC bit has been cleared
 	while(ADCSRA & (1 << ADSC));
 	fake = ADCH;
-	return fake;
+	
 	
 	// Start an ADC conversion by setting ADSC bit (bit 6)
 	ADCSRA = ADCSRA | (1 << ADSC);
