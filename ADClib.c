@@ -45,6 +45,22 @@ unsigned int analogRead10bit()
 	unsigned int y;
 	unsigned int a;
 	
+	/*todo without repeating the settings below
+	//the 10 bit function doesn't work.
+	Need to figure out why!
+	*/
+	
+	
+	unsigned char fake;
+	
+	// Start an ADC conversion by setting ADSC bit (bit 6)
+	ADCSRA = ADCSRA | (1 << ADSC);
+	
+	// Wait until the ADSC bit has been cleared
+	while(ADCSRA & (1 << ADSC));
+	fake = ADCH;
+	return fake;
+	
 	// Start an ADC conversion by setting ADSC bit (bit 6)
 	ADCSRA = ADCSRA | (1 << ADSC);
 	
