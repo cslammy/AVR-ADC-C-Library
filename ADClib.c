@@ -1,4 +1,6 @@
+#include <avr/io.h>
 #include "ADClib.h"
+
 
 void ADC_init()
 {
@@ -12,12 +14,12 @@ void ADC_init()
 
 
 	//UNOS have AVCC pulled high (see schematic) but you may need to change that depending on app.
-    //MSB 2 bits set ADC reference voltage.  00 external  01 AVCC   10 reserved  11 internal 2.56V
-	//LSB 5 bits set which pin to use for ADC. First 3 LSB just choose pin, but next 2 LSB chooses variations, 
+	//bit 7,6 bits set ADC reference voltage.  00 external  01 AVCC   10 reserved  11 internal 2.56V
+	//bit 5 set to 1 = ADC left adjust.  0 right adjust
 	//including gain shifts.
-	// other bit justifies the ADC output in registers
-	// Leave it at zero or code won't work 
-	// next line:
+	// bits 4-0 determine which port is used for input
+	// check AVR datasheet for how to set these to configure input ports.
+
 	// Configure ADC to be right justified, use AVCC as reference, and select ADC1 as ADC input
 	ADMUX = 0b01000001;
 
@@ -25,44 +27,31 @@ void ADC_init()
 	ADCSRA = 0b11000111;
 }
 
-unsigned char analogRead8bit()
+uint8_t analogRead8bit()
 {
-	unsigned char x;
-	
-	// Start an ADC conversion by setting ADSC bit (bit 6)
-	ADCSRA = ADCSRA | (1 << ADSC);
-	
-	// Wait until the ADSC bit has been cleared
-	while(ADCSRA & (1 << ADSC));
-	x = ADCH;
+	uint8_t x;
+	uint16_t temp;
+	temp = analogRead10bit();
+	x = temp >> 2;
 	
 	
 	return x;
 }
 
-unsigned int analogRead10bit()
+uint16_t analogRead10bit()
 {
-	unsigned int y;
-	unsigned int a;
+	uint16_t y;
+	uint16_t a;
 	
-	/*todo without repeating the settings below
-	//the 10 bit function doesn't work.
-	Need to figure out why!
-	*/
-	
-	
-	unsigned char fake;
-	
+	//get 8 bits and put into ADCH register.
 	// Start an ADC conversion by setting ADSC bit (bit 6)
 	ADCSRA = ADCSRA | (1 << ADSC);
-	
-	// Wait until the ADSC bit has been cleared
+	// Wait for ADSC bit to be cleared
 	while(ADCSRA & (1 << ADSC));
-	fake = ADCH;
+	ADCH;
 	
-	
-	// Start an ADC conversion by setting ADSC bit (bit 6)
 	ADCSRA = ADCSRA | (1 << ADSC);
+	//get upper 2 bits to add to lower 8.
 	
 	// Wait until the ADSC bit has been cleared
 	while(ADCSRA & (1 << ADSC));
